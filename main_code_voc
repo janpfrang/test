@@ -5,6 +5,8 @@ Version 2.6 - Added Reading Module
 - Vocabulary highlighting in texts
 - Reading statistics
 
+It is not tested yet
+
 Requirements:
 - Python 3.7+
 - No additional packages needed (uses only standard library)
