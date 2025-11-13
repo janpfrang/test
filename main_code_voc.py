@@ -1,11 +1,9 @@
 """
 Filip's English Vocabulary Learning App - Desktop Version (Refactored)
-Version 2.6 - Added Reading Module
+Version 2.61 - Added Reading Module
 - Reading texts upload and display
 - Vocabulary highlighting in texts
 - Reading statistics
-
-It is not tested yet
 
 Requirements:
 - Python 3.7+
@@ -36,6 +34,7 @@ from email.mime.text import MIMEText
 from email.mime.multipart import MIMEMultipart
 from typing import Tuple, List, Optional, Callable, Dict
 import re
+import csv  
 
 
 # ============================================================================
@@ -58,7 +57,7 @@ class Config:
     SMTP_PORT = 587
     
     # App-Version
-    VERSION = "2.6"
+    VERSION = "2.61"
     APP_NAME = "Filip's English Vocabulary Learning App"
     
     # UI-Einstellungen
@@ -1241,6 +1240,8 @@ class ListUI:
                   command=self._show_statistics).pack(side=tk.RIGHT, padx=5)
         ttk.Button(title_frame, text="🔍 Find Doublets",
                   command=self._find_doublets).pack(side=tk.RIGHT, padx=5)
+        ttk.Button(title_frame, text="💾 Export to CSV",
+                  command=self._export_to_csv).pack(side=tk.RIGHT, padx=5)
         
         # Search frame
         search_frame = ttk.Frame(frame)
@@ -1292,6 +1293,85 @@ class ListUI:
         return frame
     
     # === PRIVATE METHODS ===
+    
+    def _export_to_csv(self) -> None:
+        """Exportiert die Vokabeldatenbank als CSV-Datei."""
+        import csv
+        
+        # Get all entries
+        entries = self.db.get_all_entries()
+        
+        if not entries:
+            messagebox.showwarning("⚠️ Warning", "No vocabulary entries to export!")
+            return
+        
+        # Ask for filename
+        filename = filedialog.asksaveasfilename(
+            defaultextension=".csv",
+            filetypes=[("CSV files", "*.csv"), ("All files", "*.*")],
+            initialfile=f"vocabulary_export_{datetime.now().strftime('%Y%m%d_%H%M%S')}.csv"
+        )
+        
+        if not filename:
+            return
+        
+        try:
+            # Write CSV file
+            with open(filename, 'w', encoding='utf-8', newline='') as csvfile:
+                # Define CSV columns
+                fieldnames = [
+                    'ID',
+                    'English',
+                    'German',
+                    'Created At',
+                    'Last Queried',
+                    'Last Result',
+                    'Correct Count',
+                    'Wrong Count',
+                    'Success Rate (%)'
+                ]
+                
+                writer = csv.DictWriter(csvfile, fieldnames=fieldnames, delimiter=';')
+                
+                # Write header
+                writer.writeheader()
+                
+                # Write data
+                for entry in sorted(entries, key=lambda x: x.get('id', 0)):
+                    # Calculate success rate
+                    correct = entry.get('correct_count', 0)
+                    wrong = entry.get('wrong_count', 0)
+                    total = correct + wrong
+                    success_rate = (correct / total * 100) if total > 0 else 0
+                    
+                    # Format last result
+                    last_result = entry.get('last_result')
+                    if last_result is True:
+                        last_result_str = 'Correct'
+                    elif last_result is False:
+                        last_result_str = 'Wrong'
+                    else:
+                        last_result_str = 'Never tested'
+                    
+                    # Write row
+                    writer.writerow({
+                        'ID': entry.get('id', ''),
+                        'English': entry.get('english', ''),
+                        'German': entry.get('german', ''),
+                        'Created At': entry.get('created_at', ''),
+                        'Last Queried': entry.get('last_queried', 'Never'),
+                        'Last Result': last_result_str,
+                        'Correct Count': correct,
+                        'Wrong Count': wrong,
+                        'Success Rate (%)': f"{success_rate:.1f}"
+                    })
+            
+            messagebox.showinfo("✅ Success", 
+                              f"Exported {len(entries)} vocabulary entries to:\n\n{filename}\n\n"
+                              f"Format: CSV with semicolon delimiter\nEncoding: UTF-8")
+        
+        except Exception as e:
+            messagebox.showerror("❌ Error", f"Failed to export CSV:\n\n{e}")
     
     def _refresh_list(self) -> None:
         """Aktualisiert die Vokabelliste."""
@@ -1451,7 +1531,6 @@ QUIZ PERFORMANCE:
         else:
             messagebox.showinfo("✅ No Doublets", 
                               "No duplicate English words found!\nAll vocabulary entries are unique.")
-
 
 # ============================================================================
 # UI MODULE: READING (NEW)
