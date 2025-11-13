@@ -138,6 +138,17 @@ class TestVocabularyDatabase(unittest.TestCase):
         # "world" sollte 2x vorkommen
         world_match = [m for m in matches if m['vocab']['english'] == 'world'][0]
         self.assertEqual(len(world_match['positions']), 2)
+
+    def test_update_entry(self):
+        """Test: Vokabel bearbeiten"""
+        self.db.add_entry("hello", "hallo")
+        entry_id = self.db.get_all_entries()[0]['id']
+    
+        success, msg = self.db.update_entry(entry_id, "goodbye", "tschüss")
+    
+        self.assertTrue(success)
+        updated = self.db.get_entry_by_id(entry_id)
+        self.assertEqual(updated['english'], "goodbye")
     
     def test_add_reading_text(self):
         """Test: Lesetext hinzufügen"""
