@@ -27,16 +27,12 @@ VocabEase is built to be a straightforward and highly personalized learning tool
 
 1.  Clone the repository:
     ```bash
-    git clone [https://github.com/YourUsername/VocabEase.git](https://github.com/YourUsername/VocabEase.git)
-    cd VocabEase
+    git clone [https://github.com/janpfrang/filips_voc]
+    cd filips_voc
     ```
-2.  Install dependencies (if applicable):
+2.  Run the application:
     ```bash
-    pip install -r requirements.txt
-    ```
-3.  Run the application:
-    ```bash
-    python vocab_ease.py
+    python main_code_voc.py
     ```
 *(Adjust the installation steps above to match how your program is actually run.)*
 
