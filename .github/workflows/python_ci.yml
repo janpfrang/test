@@ -1,10 +1,17 @@
 name: Python CI Build
-
 on:
   push:
     branches: [ "main", "develop" ]
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - '.github/workflows/*.yml'
   pull_request:
     branches: [ "main" ]
+    paths:
+      - '**.py'
+      - 'requirements.txt'
+      - '.github/workflows/*.yml'
   workflow_dispatch:
 
 jobs:
